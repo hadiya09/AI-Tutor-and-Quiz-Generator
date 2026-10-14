@@ -30,7 +30,7 @@ if not API_KEY:
     st.stop()
 
 client = genai.Client(api_key=API_KEY)
-f st.button("Check available Gemini models"):
+if st.button("Check available Gemini models"):
     try:
         with st.spinner("Checking models..."):
             available_models = []
