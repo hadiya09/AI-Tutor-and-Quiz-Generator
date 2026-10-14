@@ -30,7 +30,24 @@ if not API_KEY:
     st.stop()
 
 client = genai.Client(api_key=API_KEY)
+f st.button("Check available Gemini models"):
+    try:
+        with st.spinner("Checking models..."):
+            available_models = []
 
+            for model in client.models.list():
+                actions = model.supported_actions or []
+                if "generateContent" in actions:
+                    available_models.append(model.name)
+
+        if available_models:
+            st.success("Models supporting content generation:")
+            st.code("\n".join(available_models))
+        else:
+            st.warning("No compatible models were returned.")
+
+    except Exception as exc:
+        st.error(f"Could not check models: {str(exc)[:400]}")
 
 def ask_ai(prompt):
     last_error = None
