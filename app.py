@@ -34,30 +34,41 @@ client = genai.Client(api_key=API_KEY)
 
 def ask_ai(prompt):
     last_error = None
+
     for attempt in range(3):
         try:
             response = client.models.generate_content(
                 model=MODEL_NAME,
                 contents=prompt
             )
+
             answer = response.text
             if not answer:
-                raise ValueError("The AI returned an empty response. Please try again.")
+                raise ValueError("Gemini returned an empty response.")
+
             return answer.strip()
+
         except Exception as exc:
             last_error = exc
             error_text = str(exc).upper()
-            if ("503" in error_text or "UNAVAILABLE" in error_text or
-                    "429" in error_text or "RESOURCE_EXHAUSTED" in error_text):
+
+            if (
+                "503" in error_text
+                or "UNAVAILABLE" in error_text
+                or "429" in error_text
+                or "RESOURCE_EXHAUSTED" in error_text
+            ):
                 if attempt < 2:
-                    time.sleep(2 * (attempt + 1))
+                    time.sleep(2 ** (attempt + 1))
                     continue
-                raise RuntimeError(
-                    "Gemini is temporarily busy or rate-limited. Wait a little and try again. "
-                    "If the error mentions the model name, change GEMINI_MODEL in Streamlit Secrets."
-                ) from exc
-            raise
+
+            raise RuntimeError(
+                f"Gemini API error using model '{MODEL_NAME}': "
+                f"{str(last_error)[:500]}"
+            ) from exc
+
     raise RuntimeError(str(last_error))
+
 
 
 def make_explanation(topic):
